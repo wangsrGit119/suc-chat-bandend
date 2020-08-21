@@ -10,9 +10,7 @@ import cn.wangsr.chat.model.QUserFriendsPO;
 import cn.wangsr.chat.model.QUserGroupPO;
 import cn.wangsr.chat.model.QUserInfoPO;
 import cn.wangsr.chat.model.QUserMessagePO;
-import cn.wangsr.chat.model.dto.MessageDTO;
-import cn.wangsr.chat.model.dto.UserFriendsPageDTO;
-import cn.wangsr.chat.model.dto.UserSuccessDTO;
+import cn.wangsr.chat.model.dto.*;
 import cn.wangsr.chat.util.JwtUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -74,14 +72,38 @@ public class UserServiceImpl {
     }
 
     /**
-     * 搜索用户（非好友搜索）
+     * 搜索用户 精确搜索
      * @param userId 搜索人Id
      * @param username 目标名称
      * @return
      */
-    public List<UserInfoPO> searchUser(Long userId,String username){
-
-
+    public SearchUserDTO searchUser(Long userId,String username){
+        QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
+        QUserFriendsPO qUserFriendsPO = QUserFriendsPO.userFriendsPO;
+        //查询用户
+        SearchUserDTO searchUserDTO = jpaQueryFactory.select(
+                Projections.bean(SearchUserDTO.class,
+                        qUserInfoPO.id.as("userId"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
+                        qUserInfoPO.avatarUrl,
+                        qUserInfoPO.email)
+        )
+                .from(qUserInfoPO)
+                .where(qUserInfoPO.username.eq(username)).fetchOne();
+        if(searchUserDTO != null){
+            //判断是否为自己的好友
+            UserFriendsPO userFriendsPO = jpaQueryFactory.select(qUserFriendsPO)
+                    .from(qUserFriendsPO)
+                    .where(qUserFriendsPO.userId.eq(userId).and(qUserFriendsPO.partnerId.eq(searchUserDTO.getUserId())))
+                    .fetchOne();
+            if(null != userFriendsPO){
+                searchUserDTO.setFriendsOrNot(true);
+            }else {
+                searchUserDTO.setFriendsOrNot(false);
+            }
+        }
+        return searchUserDTO;
     }
 
     /**
@@ -192,18 +214,36 @@ public class UserServiceImpl {
      */
     public void applyAddFriends(Long userId,Long targetId,String noteName){
         List<UserFriendsPO> userFriendsPOS = new ArrayList<>();
+        UserInfoPO targetUserInfoPO = userRepository.getOne(targetId);
+        QUserFriendsPO qUserFriendsPO = QUserFriendsPO.userFriendsPO;
+
+        //检查是否已有申请
+        UserFriendsPO friendsPO = jpaQueryFactory.select(qUserFriendsPO)
+                .from(qUserFriendsPO)
+                .where(qUserFriendsPO.userId.eq(userId)
+                        .and(qUserFriendsPO.partnerId.eq(targetId)
+                                .and(qUserFriendsPO.type.eq(CommonConstant.RECEIVING)))
+                        .and(qUserFriendsPO.belong.eq(CommonConstant.BELONG_OWN)))
+                .fetchOne();
+        if(null !=friendsPO){
+            throw new GlobalException(400,"已申请，请勿重复申请");
+        }
+
+
         //申请人好友信息
         UserFriendsPO userFriendsPO = UserFriendsPO.builder()
                 .userId(userId)
-                .noteName(noteName)
+                .noteName(targetUserInfoPO.getNickname())
+                .type(CommonConstant.RECEIVING)
+                .belong(CommonConstant.BELONG_OWN)
                 .partnerId(targetId).build();
         userFriendsPOS.add(userFriendsPO);
         //被申请人好友信息
-        UserInfoPO userInfoPO = userRepository.getOne(userId);
         UserFriendsPO userFriendsPO1 = UserFriendsPO.builder()
                 .userId(targetId)
-                .partnerId(userId)
-                .noteName(userInfoPO.getUsername()).build();
+                .type(CommonConstant.RECEIVING)
+                .belong(CommonConstant.BELONG_TARGET)
+                .partnerId(userId).build();
         userFriendsPOS.add(userFriendsPO1);
         userFriendsRepository.saveAll(userFriendsPOS);
     }
@@ -216,16 +256,22 @@ public class UserServiceImpl {
      */
     public void acceptFriendsApply(Long userId,Long targetId,String noteName){
         QUserFriendsPO qUserFriendsPO = QUserFriendsPO.userFriendsPO;
+        UserInfoPO targetUserInfoPO = userRepository.getOne(targetId);
         //更新自己数据
         long execute01 = jpaQueryFactory.update(qUserFriendsPO).
                 set(qUserFriendsPO.type, CommonConstant.RECEIVED)
-                .set(qUserFriendsPO.noteName, noteName)
-                .where(qUserFriendsPO.userId.eq(userId).and(qUserFriendsPO.partnerId.eq(targetId)))
+                //朋友备注
+                .set(qUserFriendsPO.noteName, targetUserInfoPO.getNickname())
+                .where(qUserFriendsPO.userId.eq(userId)
+                        .and(qUserFriendsPO.partnerId.eq(targetId))
+                        .and(qUserFriendsPO.type.eq(CommonConstant.RECEIVING)))
                 .execute();
         //更新发起方用户数据
         long execute02 = jpaQueryFactory.update(qUserFriendsPO).
                 set(qUserFriendsPO.type, CommonConstant.RECEIVED)
-                .where(qUserFriendsPO.userId.eq(targetId).and(qUserFriendsPO.partnerId.eq(userId)))
+                .where(qUserFriendsPO.userId.eq(targetId)
+                        .and(qUserFriendsPO.partnerId.eq(userId))
+                        .and(qUserFriendsPO.type.eq(CommonConstant.RECEIVING)))
                 .execute();
         if((execute01+execute02) != 2){
             throw new GlobalException(400,"操作失败");
@@ -237,13 +283,25 @@ public class UserServiceImpl {
      * @param userId
      * @return
      */
-    public List<UserFriendsPO> loadReceivingFriends(Long userId){
+    public List<FriendsUserDTO> loadReceivingFriends(Long userId){
         QUserFriendsPO qUserFriendsPO = QUserFriendsPO.userFriendsPO;
-        List<UserFriendsPO> userFriendsPOS = jpaQueryFactory.select(qUserFriendsPO)
-                .where(qUserFriendsPO.userId.eq(userId).and(qUserFriendsPO.type.eq(CommonConstant.RECEIVING)))
+        QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
+        List<FriendsUserDTO> friendsUserDTOS = jpaQueryFactory.select(
+                Projections.bean(FriendsUserDTO.class,
+                        qUserFriendsPO.userId.as("userId"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
+                        qUserInfoPO.email,
+                        qUserInfoPO.avatarUrl)
+        )
                 .from(qUserFriendsPO)
+                .leftJoin(qUserInfoPO)
+                .on(qUserFriendsPO.userId.eq(qUserInfoPO.id))
+                .where(qUserFriendsPO.userId.eq(userId)
+                        .and(qUserFriendsPO.type.eq(CommonConstant.RECEIVING))
+                        .and(qUserFriendsPO.belong.eq(CommonConstant.BELONG_TARGET)))
                 .fetch();
-        return userFriendsPOS;
+        return friendsUserDTOS;
     }
 
 

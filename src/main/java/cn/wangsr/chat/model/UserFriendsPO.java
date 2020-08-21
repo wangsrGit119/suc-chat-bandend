@@ -37,6 +37,8 @@ public class UserFriendsPO implements Serializable {
     private Long partnerId;
     @Column(columnDefinition = "int(10) COMMENT '1.待同意 2.已同意'")
     private Integer type;
+    @Column(columnDefinition = "int(10) COMMENT '1.申请人 2.被申请人'")
+    private Integer belong;
     @CreationTimestamp
     private LocalDateTime createTime;
     @UpdateTimestamp

@@ -29,7 +29,15 @@ public class CommonConstant {
      */
     public static Integer  RECEIVED = 2;
 
+    /**
+     * 申请人（好友申请）
+     */
+    public static Integer  BELONG_OWN = 1;
 
+    /**
+     * 被申请人（好友申请）
+     */
+    public static Integer  BELONG_TARGET = 2;
 
 
 }

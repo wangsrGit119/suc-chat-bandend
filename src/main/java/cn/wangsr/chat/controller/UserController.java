@@ -31,7 +31,7 @@ public class UserController {
 
     @GetMapping("/loadMessages")
     @IgnoreToken
-    public ResponseData loadMessages(Long uid,Long targetId,Integer type){
+    public ResponseData loadMessages(@RequestParam Long uid,@RequestParam Long targetId,@RequestParam Integer type){
         return ResponseData.ofSuccess("success",userService.loadUserMessageByBindTargetId(uid, targetId, type));
     }
 
@@ -41,5 +41,30 @@ public class UserController {
        return ResponseData.ofSuccess("success",userService.loadUserFriendsPage(userId));
     }
 
+    @GetMapping("/searchUser")
+    @IgnoreToken
+    public ResponseData searchUser(Long userId,String username){
+        return ResponseData.ofSuccess("success",userService.searchUser(userId, username));
+    }
+
+    @PostMapping("/applyAddFriends")
+    @IgnoreToken
+    public ResponseData applyAddFriends(@RequestParam Long userId,@RequestParam Long targetId,@RequestParam(required = false) String noteName){
+        userService.applyAddFriends(userId, targetId, noteName);
+        return ResponseData.ofSuccess("申请成功",null);
+    }
+
+    @PostMapping("/acceptFriendsApply")
+    @IgnoreToken
+    public ResponseData acceptFriendsApply(@RequestParam Long userId,@RequestParam Long targetId,@RequestParam(required = false) String noteName){
+        userService.acceptFriendsApply(userId, targetId, noteName);
+        return ResponseData.ofSuccess("success",null);
+    }
+
+    @GetMapping("/loadReceivingFriends")
+    @IgnoreToken
+    public ResponseData loadReceivingFriends(Long userId){
+        return ResponseData.ofSuccess("success",userService.loadReceivingFriends(userId));
+    }
 
 }

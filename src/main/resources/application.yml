@@ -1,0 +1,59 @@
+server:
+  port: 8006
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 10
+
+  servlet:
+    multipart:
+      file-size-threshold: 0
+
+
+  datasource:
+    name: wangsr
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      #自动提交从池中返回的连接
+      auto-commit: true
+      #池中维护的最小空闲连接数
+      minimum-idle: 5
+      ## 数据库连接超时时间,默认30秒，即30000
+      idle-timeout: 60000
+      #等待连接的超时时间，毫秒
+      connection-timeout: 30000
+    url: jdbc:mysql://localhost:3306/suc_chat_web?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update  #更新数据表不存在则自动创建
+    show-sql: true  #打印sql
+
+## 配置打印jpa sql参数
+logging:
+  level:
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+# SocketIO配置
+socketio:
+  # SocketIO端口
+  port: 9091
+  # 连接数大小
+  workCount: 100
+  # 允许客户请求
+  allowCustomRequests: true
+  # 协议升级超时时间(毫秒)，默认10秒，HTTP握手升级为ws协议超时时间
+  upgradeTimeout: 10000
+  # Ping消息超时时间(毫秒)，默认60秒，这个时间间隔内没有接收到心跳消息就会发送超时事件
+  pingTimeout: 60000
+  # Ping消息间隔(毫秒)，默认25秒。客户端向服务器发送一条心跳消息间隔
+  pingInterval: 25000
+  # 设置HTTP交互最大内容长度
+  maxHttpContentLength: 1048576
+  # 设置最大每帧处理数据的长度，防止他人利用大数据来攻击服务器
+  maxFramePayloadLength: 1048576
+
+

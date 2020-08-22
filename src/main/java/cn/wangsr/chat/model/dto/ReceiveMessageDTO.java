@@ -16,6 +16,7 @@ import java.io.Serializable;
 public class ReceiveMessageDTO<T> implements Serializable {
     private Long userId;
     private Long targetId;
+    private String targetName;
     private Integer targetType;
     private JSONObject data;
 }

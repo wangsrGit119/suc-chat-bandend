@@ -123,10 +123,10 @@ public class UserServiceImpl {
         //点对点
         if(CommonConstant.GROUP_TYPE_FRIENDS.equals(type)){
             //加载自己发送的
-            List<MessageDTO> messageDTOS01 = this.loadFriendsMessage(uid, targetId,20);
+            List<MessageDTO> messageDTOS01 = this.loadFriendsMessage(uid, targetId,20,type);
             messageDTOList.addAll(messageDTOS01);
             //加载对方发送的
-            List<MessageDTO> messageDTOS02 = this.loadFriendsMessage(targetId, uid,20);
+            List<MessageDTO> messageDTOS02 = this.loadFriendsMessage(targetId, uid,20,type);
             messageDTOList.addAll(messageDTOS02);
 
             //群聊消息
@@ -135,7 +135,7 @@ public class UserServiceImpl {
             UserGroupPO userGroupPO = groupRepository.getOne(targetId);
             String[] users = userGroupPO.getGroupUsersIds().split(CommonConstant.CHAR_CHINESE_DUN);
             for (String userId : users) {
-                List<MessageDTO> messageDTOS = loadFriendsMessage(Long.valueOf(userId), targetId, 10);
+                List<MessageDTO> messageDTOS = loadFriendsMessage(Long.valueOf(userId), targetId, 10,type);
                 messageDTOList.addAll(messageDTOS);
             }
         }
@@ -144,7 +144,7 @@ public class UserServiceImpl {
         return messageDTOSResult;
     }
 
-    public List<MessageDTO> loadFriendsMessage(Long uid,Long targetId,Integer pageSize){
+    public List<MessageDTO> loadFriendsMessage(Long uid,Long targetId,Integer pageSize,Integer type){
         QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
         QUserMessagePO qUserMessagePO = QUserMessagePO.userMessagePO;
         List<MessageDTO> messageDTOS = jpaQueryFactory.select(
@@ -158,7 +158,9 @@ public class UserServiceImpl {
                 .from(qUserMessagePO)
                 .leftJoin(qUserInfoPO)
                 .on(qUserInfoPO.id.eq(qUserMessagePO.userId))
-                .where(qUserMessagePO.userId.eq(uid).and(qUserMessagePO.bindTarget.eq(targetId)))
+                .where(qUserMessagePO.userId.eq(uid)
+                        .and(qUserMessagePO.bindTarget.eq(targetId))
+                        .and(qUserMessagePO.messageType.eq(type)))
                 .limit(pageSize)
                 .fetch();
         return messageDTOS;

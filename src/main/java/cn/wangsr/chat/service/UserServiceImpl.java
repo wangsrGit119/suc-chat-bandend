@@ -5,6 +5,7 @@ import cn.wangsr.chat.common.GlobalException;
 import cn.wangsr.chat.dao.GroupRepository;
 import cn.wangsr.chat.dao.UserFriendsRepository;
 import cn.wangsr.chat.dao.UserRepository;
+import cn.wangsr.chat.listener.SucEventListener;
 import cn.wangsr.chat.model.*;
 import cn.wangsr.chat.model.QUserFriendsPO;
 import cn.wangsr.chat.model.QUserGroupPO;
@@ -12,6 +13,8 @@ import cn.wangsr.chat.model.QUserInfoPO;
 import cn.wangsr.chat.model.QUserMessagePO;
 import cn.wangsr.chat.model.dto.*;
 import cn.wangsr.chat.util.JwtUtils;
+import com.alibaba.fastjson.JSONObject;
+import com.corundumstudio.socketio.SocketIOClient;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Service;
@@ -245,6 +248,13 @@ public class UserServiceImpl {
                 .belong(CommonConstant.BELONG_TARGET)
                 .partnerId(userId).build();
         userFriendsPOS.add(userFriendsPO1);
+        SocketIOClient socketIOClient = SucEventListener.clientMap.get(targetId.toString());
+        if(socketIOClient != null){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("message","您有新的好友申请");
+            System.out.println("已通知客户端");
+            socketIOClient.sendEvent("newFriendsNotify",jsonObject);
+        }
         userFriendsRepository.saveAll(userFriendsPOS);
     }
 
@@ -288,7 +298,7 @@ public class UserServiceImpl {
         QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
         List<FriendsUserDTO> friendsUserDTOS = jpaQueryFactory.select(
                 Projections.bean(FriendsUserDTO.class,
-                        qUserFriendsPO.userId.as("userId"),
+                        qUserFriendsPO.partnerId.as("userId"),
                         qUserInfoPO.username,
                         qUserInfoPO.nickname,
                         qUserInfoPO.email,

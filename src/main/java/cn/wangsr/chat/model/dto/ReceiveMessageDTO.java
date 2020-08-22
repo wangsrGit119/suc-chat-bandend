@@ -1,5 +1,6 @@
 package cn.wangsr.chat.model.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,5 @@ public class ReceiveMessageDTO<T> implements Serializable {
     private Long userId;
     private Long targetId;
     private Integer targetType;
-    private T data;
+    private JSONObject data;
 }

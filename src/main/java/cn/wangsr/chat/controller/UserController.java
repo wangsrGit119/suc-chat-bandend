@@ -31,8 +31,8 @@ public class UserController {
 
     @GetMapping("/loadMessages")
     @IgnoreToken
-    public ResponseData loadMessages(@RequestParam Long uid,@RequestParam Long targetId,@RequestParam Integer type){
-        return ResponseData.ofSuccess("success",userService.loadUserMessageByBindTargetId(uid, targetId, type));
+    public ResponseData loadMessages(@RequestParam Long userId,@RequestParam Long targetId,@RequestParam Integer type){
+        return ResponseData.ofSuccess("success",userService.loadUserMessageByBindTargetId(userId, targetId, type));
     }
 
     @GetMapping("/loadUserFriendsPage")

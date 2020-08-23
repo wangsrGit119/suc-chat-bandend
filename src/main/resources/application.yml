@@ -30,12 +30,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update  #更新数据表不存在则自动创建
-    show-sql: true  #打印sql
+    show-sql: false  #打印sql
 
 ## 配置打印jpa sql参数
-logging:
-  level:
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
+#logging:
+#  level:
+#    org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 # SocketIO配置
 socketio:

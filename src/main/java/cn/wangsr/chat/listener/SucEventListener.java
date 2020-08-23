@@ -99,4 +99,28 @@ public class SucEventListener {
         }
     }
 
+
+    @OnEvent("candidate")
+    public void eventToCandidate(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("eventTOCandidate {}",receiveMessageDTO);
+        SocketIOClient target = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
+        target.sendEvent("candidate",receiveMessageDTO);
+
+    }
+
+    @OnEvent("offer")
+    public void eventToOffer(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("eventToOffer {}",receiveMessageDTO);
+        SocketIOClient target = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
+        target.sendEvent("offer",receiveMessageDTO);
+
+    }
+    @OnEvent("answer")
+    public void eventToAnswer(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("eventToOffer {}",receiveMessageDTO);
+        SocketIOClient target = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
+        target.sendEvent("answer",receiveMessageDTO);
+    }
+
+
 }

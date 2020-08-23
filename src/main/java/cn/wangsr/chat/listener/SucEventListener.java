@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import javax.websocket.OnError;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,21 @@ public class SucEventListener {
         logger.info("eventToOffer {}",receiveMessageDTO);
         SocketIOClient target = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
         target.sendEvent("answer",receiveMessageDTO);
+    }
+
+    @OnEvent("1V1CommunicateVideo")
+    public void on1V1CommunicateVideo(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("1V1CommunicateVideo {}",receiveMessageDTO);
+        if(CommonConstant.GROUP_TYPE_FRIENDS.equals(receiveMessageDTO.getTargetType())){
+            SocketIOClient socketIOClient = clientMap.get(receiveMessageDTO.getTargetId().toString());
+            if(null != socketIOClient){
+                socketIOClient.sendEvent("1V1CommunicateVideo",receiveMessageDTO);
+            }else {
+                logger.info("不在线用户：{} ,用户Id {}",receiveMessageDTO.getTargetName(),receiveMessageDTO.getTargetId());
+                SocketIOClient socketIOClient02 = clientMap.get(receiveMessageDTO.getUserId().toString());
+                socketIOClient02.sendEvent("notOnline","对方不在线");
+            }
+        }
     }
 
 

@@ -63,6 +63,8 @@ public class SucEventListener {
                 .message(receiveMessageDTO.getData().get("message").toString())
                 .messageType(receiveMessageDTO.getTargetType())
                 .build();
+        //保存消息记录
+        userMessageRepository.save(userMessagePO);
         //群聊
         if(CommonConstant.GROUP_TYPE_GROUP.equals(receiveMessageDTO.getTargetType())){
             //加载群聊人员
@@ -82,7 +84,6 @@ public class SucEventListener {
             //1V1
         }else {
             SocketIOClient socketIOClient = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
-            userMessageRepository.save(userMessagePO);
             if(!StringUtils.isEmpty(socketIOClient)){
                 logger.info("目标用户ID {}不在线", receiveMessageDTO.getTargetId());
                 socketIOClient.sendEvent("sendMessage",receiveMessageDTO);

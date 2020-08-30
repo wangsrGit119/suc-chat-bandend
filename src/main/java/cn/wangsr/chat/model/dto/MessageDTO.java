@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class MessageDTO implements Serializable {
     private String username;
     private String avatarUrl;
+    private String nickname;
     private String imageUrl;
     private LocalDateTime createTime;
     private String message;

@@ -149,7 +149,8 @@ public class UserServiceImpl {
         QUserMessagePO qUserMessagePO = QUserMessagePO.userMessagePO;
         List<MessageDTO> messageDTOS = jpaQueryFactory.select(
                 Projections.bean(MessageDTO.class,
-                        qUserInfoPO.nickname.as("username"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
                         qUserInfoPO.avatarUrl,
                         qUserMessagePO.imageUrl,
                         qUserMessagePO.message,

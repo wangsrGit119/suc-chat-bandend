@@ -181,7 +181,7 @@ public class UserServiceImpl {
                 Projections.bean(
                         UserFriendsPageDTO.class,
                         qUserFriendsPO.partnerId.as("userId"),
-                        qUserFriendsPO.noteName.as("chatName"),
+                        qUserInfoPO.nickname.as("chatName"),
                         qUserInfoPO.avatarUrl)
         )
                 .from(qUserFriendsPO)

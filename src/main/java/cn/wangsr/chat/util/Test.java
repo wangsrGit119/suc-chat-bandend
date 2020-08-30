@@ -7,8 +7,12 @@ import org.springframework.util.DigestUtils;
  */
 public class Test {
     public static void main(String[] args) {
-        byte[] strs = "88888888".getBytes();
-        String digestAsHex = DigestUtils.md5DigestAsHex(strs);
-        System.out.println(digestAsHex);
+//        byte[] strs = "88888888".getBytes();
+//        String digestAsHex = DigestUtils.md5DigestAsHex(strs);
+//        System.out.println(digestAsHex);
+        Integer a = 127;
+        Integer b = 127;
+
+        System.out.println(a==b);
     }
 }

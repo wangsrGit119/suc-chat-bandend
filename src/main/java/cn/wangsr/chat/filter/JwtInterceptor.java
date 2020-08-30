@@ -22,7 +22,7 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
     private static Logger logger = LoggerFactory.getLogger(JwtInterceptor.class);
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (HttpMethod.OPTIONS.equals(request.getMethod())) {
+        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return true;
         }
@@ -37,7 +37,6 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
 
 
         String token = request.getHeader(JwtUtils.AUTH_HEADER_KEY);
-        logger.info("token {}",token);
         if(StringUtils.isEmpty(token)){
             throw new GlobalException(400,"用户未登录");
         }

@@ -317,6 +317,33 @@ public class UserServiceImpl {
         return friendsUserDTOS;
     }
 
+    /**
+     * 获取群用户列表
+     * @param groupId
+     * @return
+     */
+    public List<UserSuccessDTO> loadGroupUserInfo(Long groupId){
+        UserGroupPO groupRepositoryOne = groupRepository.getOne(groupId);
+        QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
+        String[] groupUsersIds = groupRepositoryOne.getGroupUsersIds().split(CommonConstant.CHAR_CHINESE_DUN);
+        Long[] userIds = new Long[groupUsersIds.length];
+        for (int i = 0; i < groupUsersIds.length; i++) {
+            userIds[i] = Long.valueOf(groupUsersIds[i]);
+        }
+        List<UserSuccessDTO> arrayList = jpaQueryFactory.select(
+                Projections.bean(UserSuccessDTO.class,
+                        qUserInfoPO.id.as("userId"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
+                        qUserInfoPO.avatarUrl,
+                        qUserInfoPO.email
+                )
+        )
+                .where(qUserInfoPO.id.in(userIds))
+                .from(qUserInfoPO)
+                .fetch();
+        return arrayList;
+    }
 
 
 }

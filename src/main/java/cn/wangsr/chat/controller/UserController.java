@@ -61,4 +61,8 @@ public class UserController {
         return ResponseData.ofSuccess("success",userService.loadReceivingFriends(userId));
     }
 
+    @GetMapping("/loadGroupUserInfo")
+    public ResponseData loadGroupUserInfo(Long groupId){
+        return ResponseData.ofSuccess("success",userService.loadGroupUserInfo(groupId));
+    }
 }

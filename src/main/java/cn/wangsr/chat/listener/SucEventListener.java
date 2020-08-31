@@ -139,5 +139,44 @@ public class SucEventListener {
         }
     }
 
+    @OnEvent("ManyToManyCommunicateVideo")
+    public void onManyToManyCommunicateVideo(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("ManyToManyCommunicateVideo {}",receiveMessageDTO);
+        if(CommonConstant.GROUP_TYPE_GROUP.equals(receiveMessageDTO.getTargetType())){
+            SocketIOClient socketIOClient = clientMap.get(receiveMessageDTO.getTargetId().toString());
+            if(null != socketIOClient){
+                socketIOClient.sendEvent("ManyToManyCommunicateVideo",receiveMessageDTO);
+            }else {
+                logger.info("不在线用户：{} ,用户Id {}",receiveMessageDTO.getTargetName(),receiveMessageDTO.getTargetId());
+                SocketIOClient socketIOClient02 = clientMap.get(receiveMessageDTO.getUserId().toString());
+//                socketIOClient02.sendEvent("notOnline","对方不在线");
+            }
+        }
+    }
 
+
+    @OnEvent("onJoinRoom")
+    public void onJoinRoom(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("onJoinRoom {}",receiveMessageDTO);
+        if(CommonConstant.GROUP_TYPE_GROUP.equals(receiveMessageDTO.getTargetType())){
+            SocketIOClient socketIOClient = clientMap.get(receiveMessageDTO.getTargetId().toString());
+            if(null != socketIOClient){
+                socketIOClient.sendEvent("onJoinRoom",receiveMessageDTO);
+            }else {
+                logger.info("不在线用户：{} ,用户Id {}",receiveMessageDTO.getTargetName(),receiveMessageDTO.getTargetId());
+            }
+        }
+    }
+    @OnEvent("onLeftRoom")
+    public void onLeftRoom(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("onLeftRoom {}",receiveMessageDTO);
+        if(CommonConstant.GROUP_TYPE_GROUP.equals(receiveMessageDTO.getTargetType())){
+            SocketIOClient socketIOClient = clientMap.get(receiveMessageDTO.getTargetId().toString());
+            if(null != socketIOClient){
+                socketIOClient.sendEvent("onLeftRoom",receiveMessageDTO);
+            }else {
+                logger.info("不在线用户：{} ,用户Id {}",receiveMessageDTO.getTargetName(),receiveMessageDTO.getTargetId());
+            }
+        }
+    }
 }

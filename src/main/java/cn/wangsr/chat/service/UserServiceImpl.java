@@ -166,6 +166,7 @@ public class UserServiceImpl {
                 .where(qUserMessagePO.userId.eq(uid)
                         .and(qUserMessagePO.bindTarget.eq(targetId))
                         .and(qUserMessagePO.messageType.eq(type)))
+                .orderBy(qUserMessagePO.createTime.desc())
                 .limit(pageSize)
                 .fetch();
         return messageDTOS;

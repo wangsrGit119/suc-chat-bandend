@@ -69,6 +69,10 @@ public class UserServiceImpl {
         if(StringUtils.isEmpty(userSuccessDTO)){
            throw new GlobalException(400,"用户名或密码错误");
         }
+        SocketIOClient socketIOClient = SucEventListener.clientMap.get(userSuccessDTO.getUserId().toString());
+        if(socketIOClient != null){
+            throw new GlobalException(400,"该用户已在线");
+        }
         String jwt = JwtUtils.createJwt(userSuccessDTO.getUsername(), userSuccessDTO.getUserId());
         userSuccessDTO.setToken(jwt);
         return userSuccessDTO;

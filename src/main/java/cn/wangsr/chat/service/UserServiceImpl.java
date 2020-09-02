@@ -207,7 +207,7 @@ public class UserServiceImpl {
                         qUserGroupPO.avatarUrl)
         )
                 .from(qUserGroupPO)
-                .where(qUserGroupPO.groupUsersIds.contains(String.valueOf(userId)))
+                .where(qUserGroupPO.groupUsersIds.contains(CommonConstant.CHAR_CHINESE_DUN+userId+CommonConstant.CHAR_CHINESE_DUN))
                 .fetch();
         for (UserFriendsPageDTO userFriendsPageDTO : userFriendsPageDTOS02) {
             userFriendsPageDTO.setType(CommonConstant.GROUP_TYPE_GROUP);

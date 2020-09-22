@@ -73,7 +73,11 @@ public class SucEventListener {
             Long userId = receiveMessageDTO.getUserId();
             //不给自己推送
             for (String s : split) {
+                if(StringUtils.isEmpty(s)){
+                    return;
+                }
                 Long groupOne = Long.valueOf(s);
+
                 if(!userId.equals(groupOne)){
                     SocketIOClient ioClient = clientMap.get(groupOne.toString());
                     if(null != ioClient){

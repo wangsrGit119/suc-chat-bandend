@@ -139,8 +139,10 @@ public class UserServiceImpl {
             UserGroupPO userGroupPO = groupRepository.getOne(targetId);
             String[] users = userGroupPO.getGroupUsersIds().split(CommonConstant.CHAR_CHINESE_DUN);
             for (String userId : users) {
-                List<MessageDTO> messageDTOS = loadFriendsMessage(Long.valueOf(userId), targetId, 10,type);
-                messageDTOList.addAll(messageDTOS);
+                if(!StringUtils.isEmpty(userId)){
+                    List<MessageDTO> messageDTOS = loadFriendsMessage(Long.valueOf(userId), targetId, 10,type);
+                    messageDTOList.addAll(messageDTOS);
+                }
             }
         }
         //按照时间排序
@@ -333,7 +335,9 @@ public class UserServiceImpl {
         String[] groupUsersIds = groupRepositoryOne.getGroupUsersIds().split(CommonConstant.CHAR_CHINESE_DUN);
         Long[] userIds = new Long[groupUsersIds.length];
         for (int i = 0; i < groupUsersIds.length; i++) {
-            userIds[i] = Long.valueOf(groupUsersIds[i]);
+            if(!StringUtils.isEmpty(groupUsersIds[i])){
+                userIds[i] = Long.valueOf(groupUsersIds[i]);
+            }
         }
         List<UserSuccessDTO> arrayList = jpaQueryFactory.select(
                 Projections.bean(UserSuccessDTO.class,

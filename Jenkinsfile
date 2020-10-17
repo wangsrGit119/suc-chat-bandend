@@ -3,9 +3,9 @@ pipeline {
     stages {
         stage('环境检查') {
             steps {
-                echo "${params}"
                 sh 'mvn --version'
             }
+        }
         }
         stage('构建jar包') {
                 steps {
@@ -27,9 +27,8 @@ pipeline {
                       echo '项目启动'
                       sh 'cd target && ls'
                   }
-        }
-
-        }
+         }
+      }
     post {
             always {
                 echo 'One way or another, I have finished'
@@ -47,5 +46,5 @@ pipeline {
             changed {
                 echo 'Things were different before...'
             }
-        }
+     }
 }

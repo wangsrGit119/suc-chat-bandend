@@ -6,7 +6,6 @@ pipeline {
                 sh 'mvn --version'
             }
         }
-        }
         stage('构建jar包') {
                 steps {
                     sh 'mvn clean package -Dmaven.test.skip=true'

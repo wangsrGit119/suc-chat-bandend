@@ -22,7 +22,8 @@ pipeline {
                }
         stage('项目启动') {
                          steps {
-                              sh 'pwd'
+                              echo '项目启动'
+                              sh 'cd target && ls'
                            }
                        }
 

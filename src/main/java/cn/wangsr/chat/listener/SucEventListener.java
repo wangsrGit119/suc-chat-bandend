@@ -74,7 +74,7 @@ public class SucEventListener {
             //不给自己推送
             for (String s : split) {
                 if(StringUtils.isEmpty(s)){
-                    return;
+                    continue;
                 }
                 Long groupOne = Long.valueOf(s);
 

@@ -20,25 +20,30 @@ pipeline {
                        }
                }
         stage('项目启动') {
-                         steps {
-                              sh 'java -version'
+                    input {
+                                message "是否要启动项目？"
+                                ok "yes,continue"
+                                submitter "suc"
                            }
+                     steps {
+                          sh 'java -version'
                        }
+                     }
 
     }
     post {
             always {
-                echo 'One way or another, I have finished'
+                echo '删除构建文件夹'
                 deleteDir()  /* clean up our workspace */
             }
             success {
-                echo 'I succeeeded!'
+                echo 'success'
             }
             unstable {
                 echo 'I am unstable :/'
             }
             failure {
-                echo 'I failed :('
+                echo 'failed'
             }
             changed {
                 echo 'Things were different before...'

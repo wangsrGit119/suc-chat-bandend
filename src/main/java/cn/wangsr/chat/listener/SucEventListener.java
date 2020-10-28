@@ -89,8 +89,10 @@ public class SucEventListener {
         }else {
             SocketIOClient socketIOClient = clientMap.get(String.valueOf(receiveMessageDTO.getTargetId()));
             if(!StringUtils.isEmpty(socketIOClient)){
-                logger.info("目标用户ID {}不在线", receiveMessageDTO.getTargetId());
+                logger.info("目标用户ID {}在线", receiveMessageDTO.getTargetId());
                 socketIOClient.sendEvent("sendMessage",receiveMessageDTO);
+            }else {
+                logger.info("目标用户ID {}不在线", receiveMessageDTO.getTargetId());
             }
         }
 

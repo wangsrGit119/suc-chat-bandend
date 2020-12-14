@@ -1,7 +1,9 @@
 package cn.wangsr.chat.service;
 
+import cn.hutool.system.UserInfo;
 import cn.wangsr.chat.common.CommonConstant;
 import cn.wangsr.chat.common.GlobalException;
+import cn.wangsr.chat.common.ResponseData;
 import cn.wangsr.chat.dao.GroupRepository;
 import cn.wangsr.chat.dao.UserFriendsRepository;
 import cn.wangsr.chat.dao.UserRepository;
@@ -17,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.hibernate.metamodel.model.convert.internal.JpaAttributeConverterImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
@@ -43,6 +46,40 @@ public class UserServiceImpl {
     UserRepository userRepository;
     @Resource
     UserFriendsRepository userFriendsRepository;
+
+
+    /**
+     * 注册
+     * @param username
+     * @param password
+     * @return
+     */
+    public ResponseData register(String username, String password){
+        QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
+        UserSuccessDTO userSuccessDTO = jpaQueryFactory.select(
+                Projections.bean(UserSuccessDTO.class,
+                        qUserInfoPO.id.as("userId"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
+                        qUserInfoPO.avatarUrl,
+                        qUserInfoPO.email
+                )
+        )
+                .where(qUserInfoPO.username.eq(username))
+                .from(qUserInfoPO)
+                .fetchOne();
+        if(userSuccessDTO != null){
+            throw new GlobalException(1,"用户已存在");
+        }
+        UserInfoPO userInfoPO = UserInfoPO.builder().username(username).password(DigestUtils.md5DigestAsHex(password.getBytes())).build();
+        UserInfoPO res = userRepository.save(userInfoPO);
+        if (res!=null){
+            return ResponseData.ofSuccess("注册成功",null);
+        }else{
+            return ResponseData.ofFailed("注册失败",null);
+        }
+
+    }
 
 
     /**

@@ -106,6 +106,14 @@ public class SucEventListener {
             socketIOClient.sendEvent("newFriendsNotify",data);
         }
     }
+    @OnEvent("newGroupNotify")
+    public void newGroupNotify(SocketIOClient client, JSONObject data){
+        logger.info("newGroupNotify {}",data);
+        SocketIOClient socketIOClient = clientMap.get(String.valueOf(data.get("targetId")));
+        if(socketIOClient != null){
+            socketIOClient.sendEvent("newGroupNotify",data);
+        }
+    }
 
 
     @OnEvent("candidate")

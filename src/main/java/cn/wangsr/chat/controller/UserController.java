@@ -21,6 +21,12 @@ public class UserController {
     @Resource
     UserServiceImpl userService;
 
+    @PostMapping("/register")
+    @IgnoreToken
+    public ResponseData register(@RequestParam String username, @RequestParam String password, HttpServletResponse response){
+        return userService.register(username, password);
+    }
+
     @PostMapping("/login")
     @IgnoreToken
     public ResponseData login(@RequestParam String username, @RequestParam String password, HttpServletResponse response){

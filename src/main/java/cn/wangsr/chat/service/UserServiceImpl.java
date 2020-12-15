@@ -26,9 +26,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,11 +48,10 @@ public class UserServiceImpl {
 
     /**
      * 注册
-     * @param username
-     * @param password
+     * @param userInfoPO
      * @return
      */
-    public ResponseData register(String username, String password){
+    public ResponseData register(UserInfoPO userInfoPO){
         QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
         UserSuccessDTO userSuccessDTO = jpaQueryFactory.select(
                 Projections.bean(UserSuccessDTO.class,
@@ -65,17 +62,17 @@ public class UserServiceImpl {
                         qUserInfoPO.email
                 )
         )
-                .where(qUserInfoPO.username.eq(username))
+                .where(qUserInfoPO.username.eq(userInfoPO.getUsername()))
                 .from(qUserInfoPO)
                 .fetchOne();
         if(userSuccessDTO != null){
             throw new GlobalException(1,"用户已存在");
         }
-        UserInfoPO userInfoPO = UserInfoPO.builder().username(username).password(DigestUtils.md5DigestAsHex(password.getBytes())).build();
-        UserInfoPO res = userRepository.save(userInfoPO);
-        if (res!=null){
+        userInfoPO.setPassword(DigestUtils.md5DigestAsHex(userInfoPO.getPassword().getBytes()));
+        try {
+            userRepository.save(userInfoPO);
             return ResponseData.ofSuccess("注册成功",null);
-        }else{
+        }catch (Exception e){
             return ResponseData.ofFailed("注册失败",null);
         }
 
@@ -392,4 +389,46 @@ public class UserServiceImpl {
     }
 
 
+    public ResponseData createGroup(Map<String, Object> params) {
+        Long userId = ((Integer) params.get("userId")).longValue();
+
+        QUserInfoPO qUserInfoPO = QUserInfoPO.userInfoPO;
+
+        UserSuccessDTO userSuccessDTO = jpaQueryFactory.select(
+                Projections.bean(UserSuccessDTO.class,
+                        qUserInfoPO.id.as("userId"),
+                        qUserInfoPO.username,
+                        qUserInfoPO.nickname,
+                        qUserInfoPO.avatarUrl,
+                        qUserInfoPO.email
+                )
+        )
+                .where(qUserInfoPO.id.eq(userId))
+                .from(qUserInfoPO)
+                .fetchOne();
+
+        ArrayList<Integer> invitedUserIds = (ArrayList<Integer>) params.get("invitedUserIds");
+        String groupUsersIds = ","+String.join(",", invitedUserIds.stream().map(String::valueOf).collect(Collectors.toList()))+",";
+
+        try {
+            UserGroupPO userGroupPO = UserGroupPO.builder().groupName(userSuccessDTO.getNickname()+"创建的群聊").groupUsers("").groupUsersIds(groupUsersIds).build();
+            groupRepository.save(userGroupPO);
+            for (Integer id : invitedUserIds){
+                SocketIOClient socketIOClient = SucEventListener.clientMap.get(id.toString());
+                if(socketIOClient != null){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("message","您有新的群聊申请");
+                    System.out.println("已通知客户端");
+                    socketIOClient.sendEvent("newGroupNotify",jsonObject);
+                }
+            }
+
+            return ResponseData.ofSuccess("群聊创建成功",null);
+
+        }catch (Exception e) {
+            e.printStackTrace();
+            return ResponseData.ofFailed("群聊创建失败", null);
+
+        }
+    }
 }

@@ -2,16 +2,15 @@ package cn.wangsr.chat.controller;
 
 import cn.wangsr.chat.annotation.IgnoreToken;
 import cn.wangsr.chat.common.ResponseData;
+import cn.wangsr.chat.model.UserInfoPO;
 import cn.wangsr.chat.model.dto.UserSuccessDTO;
 import cn.wangsr.chat.service.UserServiceImpl;
 import cn.wangsr.chat.util.JwtUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author wjl
@@ -23,8 +22,8 @@ public class UserController {
 
     @PostMapping("/register")
     @IgnoreToken
-    public ResponseData register(@RequestParam String username, @RequestParam String password, HttpServletResponse response){
-        return userService.register(username, password);
+    public ResponseData register(@RequestBody UserInfoPO userInfoPO, HttpServletResponse response){
+        return userService.register(userInfoPO);
     }
 
     @PostMapping("/login")
@@ -61,6 +60,29 @@ public class UserController {
         userService.acceptFriendsApply(userId, targetId, noteName);
         return ResponseData.ofSuccess("success",null);
     }
+
+//    // TODO
+//    @PostMapping("/acceptGroupApply")
+//    public ResponseData acceptGroupApply(@RequestParam Long userId,@RequestParam Long targetId,@RequestParam(required = false) String noteName){
+//        userService.acceptFriendsApply(userId, targetId, noteName);
+//        return ResponseData.ofSuccess("success",null);
+//    }
+//
+//    // TODO
+//    @PostMapping("/applyAddGroup")
+//    public ResponseData applyAddGroup(@RequestParam Long userId,@RequestParam Long targetId,@RequestParam(required = false) String noteName){
+//        userService.acceptFriendsApply(userId, targetId, noteName);
+//
+//        return ResponseData.ofSuccess("success",null);
+//    }
+
+    // TODO
+    @PostMapping("/createGroup")
+    public ResponseData createGroup(@RequestBody Map<String,Object> params){
+        return userService.createGroup(params);
+    }
+
+
 
     @GetMapping("/loadReceivingFriends")
     public ResponseData loadReceivingFriends(Long userId){

@@ -153,6 +153,21 @@ public class SucEventListener {
         }
     }
 
+    @OnEvent("1V1CommunicatePhone")
+    public void on1V1CommunicatePhone(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
+        logger.info("1V1CommunicatePhone {}",receiveMessageDTO);
+        if(CommonConstant.GROUP_TYPE_FRIENDS.equals(receiveMessageDTO.getTargetType())){
+            SocketIOClient socketIOClient = clientMap.get(receiveMessageDTO.getTargetId().toString());
+            if(null != socketIOClient){
+                socketIOClient.sendEvent("1V1CommunicatePhone",receiveMessageDTO);
+            }else {
+                logger.info("不在线用户：{} ,用户Id {}",receiveMessageDTO.getTargetName(),receiveMessageDTO.getTargetId());
+                SocketIOClient socketIOClient02 = clientMap.get(receiveMessageDTO.getUserId().toString());
+                socketIOClient02.sendEvent("notOnline","对方不在线");
+            }
+        }
+    }
+
     @OnEvent("ManyToManyCommunicateVideo")
     public void onManyToManyCommunicateVideo(SocketIOClient client, ReceiveMessageDTO receiveMessageDTO){
         logger.info("ManyToManyCommunicateVideo {}",receiveMessageDTO);
